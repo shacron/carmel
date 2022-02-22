@@ -25,29 +25,8 @@ CCFILES := \
 
 CFILES := \
 	$(SRCDIR)/stdlib/malloc.c \
-	$(SRCDIR)/string/memccpy.c \
-	$(SRCDIR)/string/memchr.c \
-	$(SRCDIR)/string/memcmp.c \
-	$(SRCDIR)/string/memcpy.c \
-	$(SRCDIR)/string/memmove.c \
-	$(SRCDIR)/string/memset.c \
-	$(SRCDIR)/string/strcat.c \
-	$(SRCDIR)/string/strcmp.c \
-	$(SRCDIR)/string/strchr.c \
-	$(SRCDIR)/string/strcpy.c \
-	$(SRCDIR)/string/strcspn.c \
-	$(SRCDIR)/string/strdup.c \
 	$(SRCDIR)/string/strerror.c \
-	$(SRCDIR)/string/strlen.c \
-	$(SRCDIR)/string/strncat.c \
-	$(SRCDIR)/string/strncmp.c \
-	$(SRCDIR)/string/strncpy.c \
-	$(SRCDIR)/string/strpbrk.c \
-	$(SRCDIR)/string/strrchr.c \
-	$(SRCDIR)/string/strspn.c \
-	$(SRCDIR)/string/strstr.c \
-	$(SRCDIR)/string/strtok.c \
-	$(SRCDIR)/string/strtok_r.c \
+	$(SRCDIR)/string.c \
 
 OBJS := $(subst $(SRCDIR),$(BUILDDIR),$(CFILES) $(CCFILES))
 OBJS := $(OBJS:.c=.c.o)
