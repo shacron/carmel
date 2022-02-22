@@ -14,6 +14,7 @@ MINVER := -macosx_version_min 12.1
 COMMON_FLAGS := -Wall -Wthread-safety -g -O0 -MMD
 CFLAGS := $(COMMON_FLAGS) -std=c11 -nostdinc
 CXXFLAGS := $(COMMON_FLAGS) -std=c++17 -nostdinc -nostdinc++
+DEFINES := -DCARMEL_UNSAFE_STRING=1
 LINKFLAGS := $(MINVER) -lSystem
 LIBFLAGS := $(MINVER) -dylib -lSystem -L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
 #LINKLIBS := -lpthreads
@@ -45,7 +46,8 @@ CFILES := \
 	$(SRCDIR)/string/strrchr.c \
 	$(SRCDIR)/string/strspn.c \
 	$(SRCDIR)/string/strstr.c \
-
+	$(SRCDIR)/string/strtok.c \
+	$(SRCDIR)/string/strtok_r.c \
 
 OBJS := $(subst $(SRCDIR),$(BUILDDIR),$(CFILES) $(CCFILES))
 OBJS := $(OBJS:.c=.c.o)

@@ -24,10 +24,12 @@ char *strpbrk(const char *s, const char *charset);
 char *strrchr(const char *s, int c);
 size_t strspn(const char *s, const char *charset);
 char *strstr(const char *haystack, const char *needle);
-
-// use strsep() if available
-char *strtok(char *restrict str, const char *restrict sep);
-
-#if __BSD_EXT_STRING
-char *strsep(char **stringp, const char *delim);
+#if CARMEL_UNSAFE_STRING
+// strtok is not thread safe, use strtok_r instead.
+char *strtok(char *restrict s, const char *restrict sep);
 #endif
+char *strtok_r(char *restrict s, const char *restrict sep, char **restrict lasts);
+
+// #if __BSD_EXT_STRING
+// char *strsep(char **stringp, const char *delim);
+// #endif
