@@ -29,13 +29,10 @@ $(eval $(call config_add,CONFIG_UNSAFE_STRING))
 CFLAGS := $(COMMON_FLAGS) -std=c11 -nostdinc
 CXXFLAGS := $(COMMON_FLAGS) -std=c++17 -nostdinc -nostdinc++
 
+CCFILES :=
+CFILES :=
 
-CCFILES := \
-
-CFILES := \
-	$(SRCDIR)/stdlib/malloc.c \
-	$(SRCDIR)/string/strerror.c \
-	$(SRCDIR)/string.c \
+include $(SRCDIR)/build.mk
 
 OBJS := $(subst $(SRCDIR),$(BUILDDIR),$(CFILES) $(CCFILES))
 OBJS := $(OBJS:.c=.c.o)
@@ -64,7 +61,7 @@ $(BUILDDIR)/$(PROJECT).$(DYLIB_EXT): $(OBJS)
 $(BUILDDIR)/%.c.o: $(SRCDIR)/%.c
 	@mkdir -p $(dir $@)
 	@echo "cc " $<
-	$(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -o $@ -c $<
+	@$(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -o $@ -c $<
 
 $(BUILDDIR)/%.cc.o: $(SRCDIR)/%.cc
 	@mkdir -p $(dir $@)
