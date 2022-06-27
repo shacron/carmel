@@ -184,10 +184,12 @@ char *strstr(const char *haystack, const char *needle) {
   return NULL;
 }
 
+#if CARMEL_UNSAFE_STRING
 char *strtok(char *restrict str, const char *restrict sep) {
   static char *lasts;
   return strtok_r(str, sep, &lasts);
 }
+#endif
 
 char *strtok_r(char *restrict s, const char *restrict sep, char **restrict lasts) {
   if (s == NULL) {

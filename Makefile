@@ -15,9 +15,20 @@ ifeq ($(UNAME_S),Darwin)
 include target/darwin.mk
 endif
 
+CONFIG_UNSAFE_STRING := 1
+
+define config_add
+ifeq ($$($(1)),1)
+DEFINES += -D$(1:CONFIG_%=CARMEL_%)=1
+endif
+endef
+
+# include config.mk
+$(eval $(call config_add,CONFIG_UNSAFE_STRING))
+
 CFLAGS := $(COMMON_FLAGS) -std=c11 -nostdinc
 CXXFLAGS := $(COMMON_FLAGS) -std=c++17 -nostdinc -nostdinc++
-DEFINES := -DCARMEL_UNSAFE_STRING=1
+
 
 CCFILES := \
 
@@ -53,12 +64,12 @@ $(BUILDDIR)/$(PROJECT).$(DYLIB_EXT): $(OBJS)
 $(BUILDDIR)/%.c.o: $(SRCDIR)/%.c
 	@mkdir -p $(dir $@)
 	@echo "cc " $<
-	@$(CC) $(CFLAGS) $(INCLUDES) -o $@ -c $<
+	$(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -o $@ -c $<
 
 $(BUILDDIR)/%.cc.o: $(SRCDIR)/%.cc
 	@mkdir -p $(dir $@)
 	@echo "c++" $<
-	@$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -o $@ -c $<
 
 .PHONY: clean
 clean:
