@@ -9,6 +9,7 @@ LINKFLAGS :=
 LIBFLAGS :=
 DEFINES :=
 INCLUDES := -Iinclude
+DYLIB_EXT := so
 
 ifeq ($(UNAME_S),Darwin)
 include target/darwin.mk
@@ -29,7 +30,7 @@ OBJS := $(subst $(SRCDIR),$(BUILDDIR),$(CFILES) $(CCFILES))
 OBJS := $(OBJS:.c=.c.o)
 OBJS := $(OBJS:.cc=.cc.o)
 
-$(PROJECT): $(BUILDDIR)/$(PROJECT).a $(BUILDDIR)/$(PROJECT).dylib
+$(PROJECT): $(BUILDDIR)/$(PROJECT).a $(BUILDDIR)/$(PROJECT).$(DYLIB_EXT)
 
 TESTCFILES := $(SRCDIR)/main.c
 TESTOBJS := $(subst $(SRCDIR),$(BUILDDIR),$(TESTCFILES))
@@ -45,7 +46,7 @@ $(BUILDDIR)/$(PROJECT).a: $(OBJS)
 	@echo "archive" $@
 	@$(ARCHIVE) -cr $@ $^
 
-$(BUILDDIR)/$(PROJECT).dylib: $(OBJS)
+$(BUILDDIR)/$(PROJECT).$(DYLIB_EXT): $(OBJS)
 	@echo "dylib" $@
 	@$(LINK) -o $@ $^ $(LIBFLAGS)
 

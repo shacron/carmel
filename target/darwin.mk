@@ -2,7 +2,9 @@
 
 UROOT ?= $(HOME)/local/homebrew
 SDK := macosx
-ARCH := arm64
+ARCH := $(shell uname -m)
+
+DYLIB_EXT := dylib
 
 CC := $(shell xcrun -sdk $(SDK) -find clang)
 CXX := $(shell xcrun -sdk $(SDK) -find clang++)
