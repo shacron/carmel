@@ -9,6 +9,7 @@ LINKFLAGS :=
 LIBFLAGS :=
 DEFINES :=
 INCLUDES := -Iinclude
+TEST_INCLUDES :=
 DYLIB_EXT := so
 
 ifeq ($(UNAME_S),Darwin)
@@ -28,27 +29,31 @@ $(eval $(call config_add,CONFIG_UNSAFE_STRING))
 
 CFLAGS := $(COMMON_FLAGS) -std=c11 -nostdinc
 CXXFLAGS := $(COMMON_FLAGS) -std=c++17 -nostdinc -nostdinc++
+TESTCFLAGS := $(COMMON_FLAGS) -std=c11
+TESTCXXFLAGS := $(COMMON_FLAGS) -std=c++17
 
 CCFILES :=
 CFILES :=
 
 include $(SRCDIR)/build.mk
 
-OBJS := $(subst $(SRCDIR),$(BUILDDIR),$(CFILES) $(CCFILES))
+OBJS := $(addprefix $(BUILDDIR)/,$(CFILES) $(CCFILES))
 OBJS := $(OBJS:.c=.c.o)
 OBJS := $(OBJS:.cc=.cc.o)
+OBJS := $(OBJS:.cpp=.cpp.o)
 
 $(PROJECT): $(BUILDDIR)/$(PROJECT).a $(BUILDDIR)/$(PROJECT).$(DYLIB_EXT)
 
-TESTCFILES := $(SRCDIR)/main.c
-TESTOBJS := $(subst $(SRCDIR),$(BUILDDIR),$(TESTCFILES))
-TESTOBJS := $(TESTOBJS:.c=.c.o)
+TESTCXXFILES :=
+include test/build.mk
+TESTOBJS := $(addprefix $(BUILDDIR)/,$(TESTCXXFILES))
+TESTOBJS := $(TESTOBJS:.cpp=.cpp.o)
 
-test: $(BUILDDIR)/test
+test unit: $(BUILDDIR)/unit
 
-$(BUILDDIR)/test: $(TESTOBJS)
+$(BUILDDIR)/unit: $(TESTOBJS) $(BUILDDIR)/$(PROJECT).a
 	@echo "link" $@
-	@$(LINK) -o $@ $^ $(LINKFLAGS)
+	@$(LINK) -o $@ $^ $(LINKFLAGS) -lgtest -lc++ -lc -alias_list test/alias.txt
 
 $(BUILDDIR)/$(PROJECT).a: $(OBJS)
 	@echo "archive" $@
@@ -58,12 +63,18 @@ $(BUILDDIR)/$(PROJECT).$(DYLIB_EXT): $(OBJS)
 	@echo "dylib" $@
 	@$(LINK) -o $@ $^ $(LIBFLAGS)
 
-$(BUILDDIR)/%.c.o: $(SRCDIR)/%.c
+$(BUILDDIR)/%.c.o: %.c
 	@mkdir -p $(dir $@)
 	@echo "cc " $<
 	@$(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -o $@ -c $<
 
-$(BUILDDIR)/%.cc.o: $(SRCDIR)/%.cc
+$(BUILDDIR)/test/%.cpp.o: test/%.cpp
+	@mkdir -p $(dir $@)
+	@echo "c++" $<
+	@$(CXX) $(TESTCXXFLAGS) $(DEFINES) $(TEST_INCLUDES) -o $@ -c $<
+
+$(BUILDDIR)/%.cc.o: %.cc
+$(BUILDDIR)/%.cpp.o: %.cpp
 	@mkdir -p $(dir $@)
 	@echo "c++" $<
 	@$(CXX) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -o $@ -c $<

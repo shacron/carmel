@@ -1,0 +1,3 @@
+# list of symbol aliases for the test linker
+
+_memchr _carmel_memchr
