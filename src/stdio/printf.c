@@ -7,7 +7,7 @@
 #define FLAG_UNSIGNED   (1u << 4)
 #define FLAG_HEX        (1u << 5)
 
-// extern void platform_putchar(char c);
+extern void platform_putchar(char c);
 
 static int print_unsigned_decimal(unsigned long num);
 
@@ -67,10 +67,10 @@ static int print_hex(unsigned long num) {
     return count;
 }
 
-// int putchar(int c) {
-//   platform_putchar(c);
-//   return 0;
-// }
+int putchar(int c) {
+  platform_putchar(c);
+  return 0;
+}
 
 int puts(const char *s) {
   for ( ; *s; s++) putchar(*s);

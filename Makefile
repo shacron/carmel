@@ -42,7 +42,8 @@ OBJS := $(OBJS:.c=.c.o)
 OBJS := $(OBJS:.cc=.cc.o)
 OBJS := $(OBJS:.cpp=.cpp.o)
 
-$(PROJECT): $(BUILDDIR)/$(PROJECT).a $(BUILDDIR)/$(PROJECT).$(DYLIB_EXT)
+# $(PROJECT): $(BUILDDIR)/$(PROJECT).a $(BUILDDIR)/$(PROJECT).$(DYLIB_EXT)
+$(PROJECT): $(BUILDDIR)/$(PROJECT).a
 
 TESTCXXFILES :=
 include test/build.mk
