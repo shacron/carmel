@@ -14,6 +14,10 @@ DYLIB_EXT := so
 
 ifeq ($(UNAME_S),Darwin)
 include target/darwin.mk
+else
+ifeq ($(UNAME_S),Linux)
+include target/linux.mk
+endif
 endif
 
 CONFIG_UNSAFE_STRING := 1
