@@ -2,7 +2,8 @@ BUILDDIR ?= build
 SRCDIR := src
 PROJECT := carmel
 
-UNAME_S ?= $(shell uname -s)
+TARGET_OS ?= host
+TARGET_CFLAGS ?=
 
 COMMON_FLAGS := -Wall -Wthread-safety -g -O3 -MMD
 LINKFLAGS :=
@@ -11,14 +12,22 @@ DEFINES :=
 INCLUDES := -Iinclude
 TEST_INCLUDES :=
 DYLIB_EXT := so
+TARGET_FLAGS :=
 
-ifeq ($(UNAME_S),Darwin)
-include target/darwin.mk
+ifeq ($(TARGET_OS),host)
+
+TARGET_OS := $(shell uname -s | tr '[:upper:]' '[:lower:]')
+include target/$(TARGET_OS).mk
+
 else
-ifeq ($(UNAME_S),Linux)
-include target/linux.mk
-endif
-endif
+
+DYLIB_EXT ?= so
+CC ?= clang
+CXX ?= clang++
+ARCHIVE ?= ar
+LINK ?= ld
+
+endif # TARGET_OS
 
 CONFIG_UNSAFE_STRING := 1
 
@@ -31,8 +40,8 @@ endef
 # include config.mk
 $(eval $(call config_add,CONFIG_UNSAFE_STRING))
 
-CFLAGS := $(COMMON_FLAGS) -std=c11 -nostdinc
-CXXFLAGS := $(COMMON_FLAGS) -std=c++17 -nostdinc -nostdinc++
+CFLAGS := $(COMMON_FLAGS) $(TARGET_CFLAGS) -std=c11 -nostdinc
+CXXFLAGS := $(COMMON_FLAGS) $(TARGET_CFLAGS) -std=c++17 -nostdinc -nostdinc++
 TESTCFLAGS := $(COMMON_FLAGS) -std=c11
 TESTCXXFLAGS := $(COMMON_FLAGS) -std=c++17
 
