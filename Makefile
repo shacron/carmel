@@ -5,6 +5,8 @@ PROJECT := carmel
 TARGET_OS ?= host
 TARGET_CFLAGS ?=
 PREFIX ?= export
+HEADER_PREFIX ?= $(PREFIX)
+LIB_PREFIX ?= $(PREFIX)
 
 COMMON_FLAGS := -Wall -Wthread-safety -g -O3 -MMD
 LINKFLAGS :=
@@ -65,10 +67,10 @@ TESTOBJS := $(addprefix $(BUILDDIR)/,$(TESTCXXFILES))
 TESTOBJS := $(TESTOBJS:.cpp=.cpp.o)
 
 install: $(BUILDDIR)/$(PROJECT).a
-	@mkdir -p $(PREFIX)/include
-	@cp -r include/* $(PREFIX)/include
-	@mkdir -p $(PREFIX)/lib
-	@cp $(BUILDDIR)/$(PROJECT).a $(PREFIX)/lib/libc.a
+	@mkdir -p $(HEADER_PREFIX)/include
+	@cp -r include/* $(HEADER_PREFIX)/include
+	@mkdir -p $(LIB_PREFIX)/lib
+	@cp $(BUILDDIR)/$(PROJECT).a $(LIB_PREFIX)/lib/libc.a
 
 test unit: $(BUILDDIR)/unit
 
