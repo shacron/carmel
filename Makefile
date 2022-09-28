@@ -9,13 +9,12 @@ HEADER_PREFIX ?= $(PREFIX)
 LIB_PREFIX ?= $(PREFIX)
 
 COMMON_FLAGS := -Wall -Wthread-safety -g -O3 -MMD
-LINKFLAGS :=
+LDFLAGS :=
 LIBFLAGS :=
 DEFINES :=
 INCLUDES := -Iinclude
 TEST_INCLUDES :=
 DYLIB_EXT := so
-TARGET_FLAGS :=
 
 ifeq ($(TARGET_OS),host)
 
@@ -27,8 +26,8 @@ else
 DYLIB_EXT ?= so
 CC ?= clang
 CXX ?= clang++
-ARCHIVE ?= ar
-LINK ?= ld
+AR ?= ar
+LD ?= ld
 
 endif # TARGET_OS
 
@@ -76,15 +75,15 @@ test unit: $(BUILDDIR)/unit
 
 $(BUILDDIR)/unit: $(TESTOBJS) $(BUILDDIR)/$(PROJECT).a
 	@echo "link" $@
-	@$(LINK) -o $@ $^ $(LINKFLAGS) -lgtest -lc++ -lc -alias_list test/alias.txt
+	@$(LD) -o $@ $^ $(LDFLAGS) -lgtest -lc++ -lc -alias_list test/alias.txt
 
 $(BUILDDIR)/$(PROJECT).a: $(OBJS)
 	@echo "archive" $@
-	@$(ARCHIVE) -cr $@ $^
+	@$(AR) -cr $@ $^
 
 $(BUILDDIR)/$(PROJECT).$(DYLIB_EXT): $(OBJS)
 	@echo "dylib" $@
-	@$(LINK) -o $@ $^ $(LIBFLAGS)
+	@$(LD) -o $@ $^ $(LIBFLAGS)
 
 $(BUILDDIR)/%.c.o: %.c
 	@mkdir -p $(dir $@)
