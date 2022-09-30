@@ -49,14 +49,10 @@
 #define UINT_WIDTH    (sizeof(unsigned int) * CHAR_BIT)
 #define ULONG_WIDTH   (sizeof(unsigned long) * CHAR_BIT)
 #define ULLONG_WIDTH  (sizeof(unsigned long long) * CHAR_BIT)
-#define UCHAR_MAX     ((unsigned char)(~0))
-#define USHRT_MAX     ((unsigned short)(~0))
-#define UINT_MAX      ((unsigned int)(~0))
+#define UCHAR_MAX     0xff
+#define USHRT_MAX     0xffff
+#define UINT_MAX      0xffffffff
 #define ULONG_MAX     (~0ul)
 #define ULLONG_MAX    (~0ull)
-#define PTRDIFF_MIN   (-PTRDIFF_WIDTH - 1)
-#define SIG_ATOMIC_MIN (-SIG_ATOMIC_WIDTH - 1)
-#define WINT_MIN      (-WINT_MAX - 1)
-#define WCHAR_MIN     (-WCHAR_MAX - 1)
 
 
