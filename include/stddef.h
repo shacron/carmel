@@ -8,3 +8,5 @@ typedef __SIZE_TYPE__ size_t;
 // This may be incorrect for some targets
 typedef unsigned long size_t;
 #endif
+
+#define offsetof(t,m) __builtin_offsetof(t,m)
