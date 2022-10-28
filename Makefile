@@ -5,8 +5,8 @@ PROJECT := carmel
 TARGET_OS ?= host
 TARGET_CFLAGS ?=
 PREFIX ?= export
-HEADER_PREFIX ?= $(PREFIX)
-LIB_PREFIX ?= $(PREFIX)
+HEADER_PREFIX ?= $(PREFIX)/include
+LIB_PREFIX ?= $(PREFIX)/lib
 
 COMMON_FLAGS := -Wall -Wthread-safety -g -O3 -MMD
 LDFLAGS :=
@@ -66,19 +66,19 @@ TESTOBJS := $(addprefix $(BUILDDIR)/,$(TESTCXXFILES))
 TESTOBJS := $(TESTOBJS:.cpp=.cpp.o)
 
 install: $(BUILDDIR)/$(PROJECT).a
-	@mkdir -p $(HEADER_PREFIX)/include
-	@cp -r include/* $(HEADER_PREFIX)/include
-	@mkdir -p $(LIB_PREFIX)/lib
-	@cp $(BUILDDIR)/$(PROJECT).a $(LIB_PREFIX)/lib/libc.a
+	@mkdir -p $(HEADER_PREFIX)
+	@cp -r include/* $(HEADER_PREFIX)
+	@mkdir -p $(LIB_PREFIX)
+	@cp $(BUILDDIR)/$(PROJECT).a $(LIB_PREFIX)/libc.a
 
 test unit: $(BUILDDIR)/unit
 
 $(BUILDDIR)/unit: $(TESTOBJS) $(BUILDDIR)/$(PROJECT).a
-	@echo "link" $@
+	@echo "ln " $@
 	@$(LD) -o $@ $^ $(LDFLAGS) -lgtest -lc++ -lc -alias_list test/alias.txt
 
 $(BUILDDIR)/$(PROJECT).a: $(OBJS)
-	@echo "archive" $@
+	@echo "ar " $(notdir $@)
 	@$(AR) -cr $@ $^
 
 $(BUILDDIR)/$(PROJECT).$(DYLIB_EXT): $(OBJS)
