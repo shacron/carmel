@@ -65,11 +65,24 @@ include test/build.mk
 TESTOBJS := $(addprefix $(BUILDDIR)/,$(TESTCXXFILES))
 TESTOBJS := $(TESTOBJS:.cpp=.cpp.o)
 
-install: $(BUILDDIR)/$(PROJECT).a
-	@mkdir -p $(HEADER_PREFIX)
-	@cp -r include/* $(HEADER_PREFIX)
+
+# install rules
+
+$(LIB_PREFIX)/libc.a: $(BUILDDIR)/$(PROJECT).a
 	@mkdir -p $(LIB_PREFIX)
-	@cp $(BUILDDIR)/$(PROJECT).a $(LIB_PREFIX)/libc.a
+	cp $(BUILDDIR)/$(PROJECT).a $(LIB_PREFIX)/libc.a
+
+$(HEADER_PREFIX)/%.h: include/%.h
+	@mkdir -p $(dir $@)
+	cp $^ $@
+
+ifeq ($(MAKECMDGOALS),install)
+PUB_HEADERS := $(shell find include -name '*.h')
+PUB_HEADERS := $(PUB_HEADERS:include/%=$(HEADER_PREFIX)/%)
+endif
+
+
+install: $(PUB_HEADERS) $(LIB_PREFIX)/libc.a
 
 test unit: $(BUILDDIR)/unit
 
