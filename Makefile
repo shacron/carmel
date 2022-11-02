@@ -70,11 +70,11 @@ TESTOBJS := $(TESTOBJS:.cpp=.cpp.o)
 
 $(LIB_PREFIX)/libc.a: $(BUILDDIR)/$(PROJECT).a
 	@mkdir -p $(LIB_PREFIX)
-	cp $(BUILDDIR)/$(PROJECT).a $(LIB_PREFIX)/libc.a
+	@cp $(BUILDDIR)/$(PROJECT).a $(LIB_PREFIX)/libc.a
 
 $(HEADER_PREFIX)/%.h: include/%.h
 	@mkdir -p $(dir $@)
-	cp $^ $@
+	@cp $^ $@
 
 ifeq ($(MAKECMDGOALS),install)
 PUB_HEADERS := $(shell find include -name '*.h')
@@ -87,31 +87,31 @@ install: $(PUB_HEADERS) $(LIB_PREFIX)/libc.a
 test unit: $(BUILDDIR)/unit
 
 $(BUILDDIR)/unit: $(TESTOBJS) $(BUILDDIR)/$(PROJECT).a
-	@echo "ln " $@
+	@echo " [ld]" $(notdir $@)
 	@$(LD) -o $@ $^ $(LDFLAGS) -lgtest -lc++ -lc -alias_list test/alias.txt
 
 $(BUILDDIR)/$(PROJECT).a: $(OBJS)
-	@echo "ar " $(notdir $@)
+	@echo " [ar]" $(notdir $@)
 	@$(AR) -cr $@ $^
 
 $(BUILDDIR)/$(PROJECT).$(DYLIB_EXT): $(OBJS)
-	@echo "dylib" $@
+	@echo " [dylib] " $@
 	@$(LD) -o $@ $^ $(LIBFLAGS)
 
 $(BUILDDIR)/%.c.o: %.c
 	@mkdir -p $(dir $@)
-	@echo "cc " $<
+	@echo " [cc]" $<
 	@$(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -o $@ -c $<
 
 $(BUILDDIR)/test/%.cpp.o: test/%.cpp
 	@mkdir -p $(dir $@)
-	@echo "c++" $<
+	@echo " [c++]" $<
 	@$(CXX) $(TESTCXXFLAGS) $(DEFINES) $(TEST_INCLUDES) -o $@ -c $<
 
 $(BUILDDIR)/%.cc.o: %.cc
 $(BUILDDIR)/%.cpp.o: %.cpp
 	@mkdir -p $(dir $@)
-	@echo "c++" $<
+	@echo " [c++]" $<
 	@$(CXX) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -o $@ -c $<
 
 .PHONY: clean
