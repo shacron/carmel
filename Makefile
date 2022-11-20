@@ -57,14 +57,7 @@ OBJS := $(OBJS:.c=.c.o)
 OBJS := $(OBJS:.cc=.cc.o)
 OBJS := $(OBJS:.cpp=.cpp.o)
 
-# $(PROJECT): $(BUILDDIR)/$(PROJECT).a $(BUILDDIR)/$(PROJECT).$(DYLIB_EXT)
 $(PROJECT): $(BUILDDIR)/$(PROJECT).a
-
-TESTCXXFILES :=
-include test/build.mk
-TESTOBJS := $(addprefix $(BUILDDIR)/,$(TESTCXXFILES))
-TESTOBJS := $(TESTOBJS:.cpp=.cpp.o)
-
 
 # install rules
 
@@ -84,12 +77,6 @@ endif
 
 install: $(PUB_HEADERS) $(LIB_PREFIX)/libc.a
 
-test unit: $(BUILDDIR)/unit
-
-$(BUILDDIR)/unit: $(TESTOBJS) $(BUILDDIR)/$(PROJECT).a
-	@echo " [ld]" $(notdir $@)
-	@$(LD) -o $@ $^ $(LDFLAGS) -lgtest -lc++ -lc -alias_list test/alias.txt
-
 $(BUILDDIR)/$(PROJECT).a: $(OBJS)
 	@echo " [ar]" $(notdir $@)
 	@$(AR) -cr $@ $^
@@ -102,17 +89,6 @@ $(BUILDDIR)/%.c.o: %.c
 	@mkdir -p $(dir $@)
 	@echo " [cc]" $<
 	@$(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -o $@ -c $<
-
-$(BUILDDIR)/test/%.cpp.o: test/%.cpp
-	@mkdir -p $(dir $@)
-	@echo " [c++]" $<
-	@$(CXX) $(TESTCXXFLAGS) $(DEFINES) $(TEST_INCLUDES) -o $@ -c $<
-
-$(BUILDDIR)/%.cc.o: %.cc
-$(BUILDDIR)/%.cpp.o: %.cpp
-	@mkdir -p $(dir $@)
-	@echo " [c++]" $<
-	@$(CXX) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -o $@ -c $<
 
 .PHONY: clean
 clean:
