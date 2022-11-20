@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include <stdio.h>
 #include <limits.h>
 
@@ -131,6 +132,14 @@ next_flag:
             goto next_flag;
 
         // format characters
+
+        case 's':
+        {
+            char *s = va_arg(ap, char *);
+            if (s == NULL) s = "<NULL>";
+            for ( ; *s; s++) putchar(*s);
+            break;
+        }
 
         case 'c':
         {
