@@ -18,7 +18,7 @@ BLD_TARGET_LIBDIR ?= $(PREFIX)/lib
 
 COMMON_FLAGS := -Wall -Wthread-safety -g -O3 -MMD
 DEFINES :=
-INCLUDES := -Iinclude
+INCLUDES := -Iinclude -I$(SRCDIR)/inc
 
 BLD_TARGET_CC ?= clang
 BLD_TARGET_AR ?= ar

@@ -1,6 +1,8 @@
+#include <limits.h>
 #include <stddef.h>
 #include <stdio.h>
-#include <limits.h>
+
+#include <carmel/platform.h>
 
 #define FLAG_LONG       (1u << 0)
 #define FLAG_LONG_LONG  (1u << 1)
@@ -8,8 +10,6 @@
 #define FLAG_SIZE_T     (1u << 3)
 #define FLAG_UNSIGNED   (1u << 4)
 #define FLAG_HEX        (1u << 5)
-
-extern void platform_putchar(char c);
 
 static int print_unsigned_decimal(unsigned long long num);
 
