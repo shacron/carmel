@@ -10,3 +10,5 @@ int puts(const char *s);
 
 int printf(const char * restrict format, ...) __attribute__((__format__ (__printf__, 1, 2)));
 int vprintf(const char * restrict format, va_list ap);
+
+void perror(const char *s);
