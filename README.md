@@ -7,6 +7,36 @@ This is a WORK IN PROGRESS. If you are looking for production-ready code, there 
 
 This project contains a basic, partial implementation of the C standard library. The intended use is for embedded targets and other low-overhead code. As such, it does not plan to support localization, time zones, math libraries, and other big-system things. The implemented functions are very basic and unoptimized.
 
+## Usage
+
+### Prerequisites
+
+This code has been tested to build with `make` and `clang` on macOS and Linux.
+
+### Building
+
+    make -j <num>
+
+Produce a static library, `carmel.a`. This static library is targeted to the host machine. This is useful for testing but not for cross-compilation to the intended target.
+
+To cross-compile, override the build options in `Makefile` The makefile includes many variables named `BLD_something` that expect to be overriden via the command line or environment. Use them to point to the target toolchain and define the necessary flags.
+
+    make -j 20 \
+        BLD_TARGET_CC=/path/to/cc \
+        BLD_TARGET_AR=/path/to/llvm-ar \
+        BLD_TARGET_CFLAGS="-target arm-linux-none -march=armv7 -mfloat-abi=hard"
+
+Other overrideable options can control the build output. See the makefile for details.
+
+    make install
+
+Installing copies the C standard headers as well as a copy of the static library (renamed to libc.a) to the install destination. These can be controlled by `BLD_TARGET_INCDIR` and `BLD_TARGET_LIBDIR`, respectively.
+
+### Linking
+
+The linking code must provide an implementation of the platform functions defined in `src/inc/carmel/platform.h`. These perform platform-specific low-level tasks that cannot be implemented by this library.
+
+
 ## Questions
 
 ### Why does this exist?
