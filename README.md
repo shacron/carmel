@@ -21,7 +21,7 @@ Produce a static library, `carmel.a`. This static library is targeted to the hos
 
 To cross-compile, override the build options in `Makefile` The makefile includes many variables named `BLD_something` that expect to be overriden via the command line or environment. Use them to point to the target toolchain and define the necessary flags.
 
-    make -j 20 \
+    make -j <num> \
         BLD_TARGET_CC=/path/to/cc \
         BLD_TARGET_AR=/path/to/llvm-ar \
         BLD_TARGET_CFLAGS="-target arm-linux-none -march=armv7 -mfloat-abi=hard"
