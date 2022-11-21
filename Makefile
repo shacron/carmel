@@ -1,35 +1,22 @@
-BUILDDIR ?= build
+BLD_BASEDIR ?= build
+BLD_TARGET_LIBDIR ?= $(BLD_BASEDIR)/lib
+BLD_TARGET_OBJDIR ?= $(BLD_BASEDIR)/obj
+
 SRCDIR := src
 PROJECT := carmel
 
-TARGET_OS ?= host
-TARGET_CFLAGS ?=
+BLD_TARGET_CFLAGS ?=
 PREFIX ?= export
-HEADER_PREFIX ?= $(PREFIX)/include
-LIB_PREFIX ?= $(PREFIX)/lib
+BLD_TARGET_INCDIR ?= $(PREFIX)/include
+BLD_TARGET_LIBDIR ?= $(PREFIX)/lib
 
 COMMON_FLAGS := -Wall -Wthread-safety -g -O3 -MMD
-LDFLAGS :=
-LIBFLAGS :=
 DEFINES :=
 INCLUDES := -Iinclude
-TEST_INCLUDES :=
-DYLIB_EXT := so
 
-ifeq ($(TARGET_OS),host)
-
-TARGET_OS := $(shell uname -s | tr '[:upper:]' '[:lower:]')
-include target/$(TARGET_OS).mk
-
-else
-
-DYLIB_EXT ?= so
-CC ?= clang
-CXX ?= clang++
-AR ?= ar
-LD ?= ld
-
-endif # TARGET_OS
+BLD_TARGET_CC ?= clang
+BLD_TARGET_AR ?= ar
+BLD_TARGET_LD ?= ld
 
 CONFIG_UNSAFE_STRING := 1
 
@@ -42,56 +29,45 @@ endef
 # include config.mk
 $(eval $(call config_add,CONFIG_UNSAFE_STRING))
 
-CFLAGS := $(COMMON_FLAGS) $(TARGET_CFLAGS) -std=c11 -nostdinc
-CXXFLAGS := $(COMMON_FLAGS) $(TARGET_CFLAGS) -std=c++17 -nostdinc -nostdinc++
-TESTCFLAGS := $(COMMON_FLAGS) -std=c11
-TESTCXXFLAGS := $(COMMON_FLAGS) -std=c++17
-
-CCFILES :=
+CFLAGS := $(COMMON_FLAGS) $(BLD_TARGET_CFLAGS) -std=c11 -nostdinc
 CFILES :=
 
 include $(SRCDIR)/build.mk
 
-OBJS := $(addprefix $(BUILDDIR)/,$(CFILES) $(CCFILES))
+OBJS := $(addprefix $(BLD_TARGET_OBJDIR)/,$(CFILES))
 OBJS := $(OBJS:.c=.c.o)
-OBJS := $(OBJS:.cc=.cc.o)
-OBJS := $(OBJS:.cpp=.cpp.o)
 
-$(PROJECT): $(BUILDDIR)/$(PROJECT).a
+$(PROJECT): $(BLD_BASEDIR)/$(PROJECT).a
 
 # install rules
 
-$(LIB_PREFIX)/libc.a: $(BUILDDIR)/$(PROJECT).a
-	@mkdir -p $(LIB_PREFIX)
-	@cp $(BUILDDIR)/$(PROJECT).a $(LIB_PREFIX)/libc.a
+$(BLD_TARGET_LIBDIR)/libc.a: $(BLD_BASEDIR)/$(PROJECT).a
+	@mkdir -p $(BLD_TARGET_LIBDIR)
+	@cp $(BLD_BASEDIR)/$(PROJECT).a $(BLD_TARGET_LIBDIR)/libc.a
 
-$(HEADER_PREFIX)/%.h: include/%.h
+$(BLD_TARGET_INCDIR)/%.h: include/%.h
 	@mkdir -p $(dir $@)
 	@cp $^ $@
 
 ifeq ($(MAKECMDGOALS),install)
 PUB_HEADERS := $(shell find include -name '*.h')
-PUB_HEADERS := $(PUB_HEADERS:include/%=$(HEADER_PREFIX)/%)
+PUB_HEADERS := $(PUB_HEADERS:include/%=$(BLD_TARGET_INCDIR)/%)
 endif
 
 
-install: $(PUB_HEADERS) $(LIB_PREFIX)/libc.a
+install: $(PUB_HEADERS) $(BLD_TARGET_LIBDIR)/libc.a
 
-$(BUILDDIR)/$(PROJECT).a: $(OBJS)
+$(BLD_BASEDIR)/$(PROJECT).a: $(OBJS)
 	@echo " [ar]" $(notdir $@)
-	@$(AR) -cr $@ $^
+	@$(BLD_TARGET_AR) -cr $@ $^
 
-$(BUILDDIR)/$(PROJECT).$(DYLIB_EXT): $(OBJS)
-	@echo " [dylib] " $@
-	@$(LD) -o $@ $^ $(LIBFLAGS)
-
-$(BUILDDIR)/%.c.o: %.c
+$(BLD_TARGET_OBJDIR)/%.c.o: %.c
 	@mkdir -p $(dir $@)
 	@echo " [cc]" $<
-	@$(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -o $@ -c $<
+	@$(BLD_TARGET_CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -o $@ -c $<
 
 .PHONY: clean
 clean:
-	@rm -rf $(BUILDDIR)
+	@rm -rf $(BLD_BASEDIR)
 
 include $(wildcard $(OBJS:.o=.d))
