@@ -22,7 +22,6 @@ INCLUDES := -Iinclude -I$(SRCDIR)/inc
 
 BLD_TARGET_CC ?= clang
 BLD_TARGET_AR ?= ar
-BLD_TARGET_LD ?= ld
 
 CFLAGS := $(COMMON_FLAGS) $(BLD_TARGET_CFLAGS) -std=c11 -nostdinc
 CFILES :=
