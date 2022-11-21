@@ -32,8 +32,7 @@ CFILES :=
 ############################################################
 
 # todo, make this more dynamic
-DEFINES += -DCARMEL_UNSAFE_STRING=1
-
+DEFINES += -DCARMEL_UNSAFE_STRING=1 -DCARMEL_THREAD_LOCAL=1
 
 
 include $(SRCDIR)/build.mk
