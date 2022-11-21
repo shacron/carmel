@@ -1,9 +1,15 @@
+############################################################
+# carmel build system
+# variables named BLD_* are expected to be derived from a
+# higher-level make invocation, if present.
+############################################################
+
+PROJECT := carmel
+SRCDIR := src
+
 BLD_BASEDIR ?= build
 BLD_TARGET_LIBDIR ?= $(BLD_BASEDIR)/lib
 BLD_TARGET_OBJDIR ?= $(BLD_BASEDIR)/obj
-
-SRCDIR := src
-PROJECT := carmel
 
 BLD_TARGET_CFLAGS ?=
 PREFIX ?= export
@@ -18,19 +24,18 @@ BLD_TARGET_CC ?= clang
 BLD_TARGET_AR ?= ar
 BLD_TARGET_LD ?= ld
 
-CONFIG_UNSAFE_STRING := 1
-
-define config_add
-ifeq ($$($(1)),1)
-DEFINES += -D$(1:CONFIG_%=CARMEL_%)=1
-endif
-endef
-
-# include config.mk
-$(eval $(call config_add,CONFIG_UNSAFE_STRING))
-
 CFLAGS := $(COMMON_FLAGS) $(BLD_TARGET_CFLAGS) -std=c11 -nostdinc
 CFILES :=
+
+
+############################################################
+# build config options
+############################################################
+
+# todo, make this more dynamic
+DEFINES += -DCARMEL_UNSAFE_STRING=1
+
+
 
 include $(SRCDIR)/build.mk
 
@@ -39,7 +44,9 @@ OBJS := $(OBJS:.c=.c.o)
 
 $(PROJECT): $(BLD_BASEDIR)/$(PROJECT).a
 
+############################################################
 # install rules
+############################################################
 
 $(BLD_TARGET_LIBDIR)/libc.a: $(BLD_BASEDIR)/$(PROJECT).a
 	@mkdir -p $(BLD_TARGET_LIBDIR)
@@ -57,6 +64,10 @@ endif
 
 install: $(PUB_HEADERS) $(BLD_TARGET_LIBDIR)/libc.a
 
+############################################################
+# build rules
+############################################################
+
 $(BLD_BASEDIR)/$(PROJECT).a: $(OBJS)
 	@echo " [ar]" $(notdir $@)
 	@$(BLD_TARGET_AR) -cr $@ $^
@@ -65,6 +76,10 @@ $(BLD_TARGET_OBJDIR)/%.c.o: %.c
 	@mkdir -p $(dir $@)
 	@echo " [cc]" $<
 	@$(BLD_TARGET_CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -o $@ -c $<
+
+############################################################
+# clean rules
+############################################################
 
 .PHONY: clean
 clean:
