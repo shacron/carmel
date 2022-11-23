@@ -28,6 +28,10 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+int atoi(const char *str) {
+    return (int)strtol(str, (char **)NULL, 10);
+}
+
 long strtol(const char *restrict s, char **restrict endptr, int base) {
     unsigned int b = base;
     if ((b == 1) || (b > 36)) {

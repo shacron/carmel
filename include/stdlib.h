@@ -7,3 +7,6 @@ _Noreturn void abort(void);
 void *calloc(size_t count, size_t size);
 void free(void *ptr);
 void *malloc(size_t size);
+
+int atoi(const char *str);
+long strtol(const char *restrict s, char **restrict endptr, int base);
