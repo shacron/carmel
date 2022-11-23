@@ -72,7 +72,7 @@ long strtol(const char *restrict s, char **restrict endptr, int base) {
     }
 
     for ( ; *s != '\0'; s++) {
-        char c = *s;
+        unsigned char c = *s;
         unsigned int add = 0;
         if ((c >= '0') && (c <= '9')) add = c - '0';
         else {
@@ -102,7 +102,7 @@ long strtol(const char *restrict s, char **restrict endptr, int base) {
 
     // munch remaining
     for ( ; *s != '\0'; s++) {
-        char c = *s;
+        unsigned char c = *s;
         unsigned int add = 0x100;
         if ((c >= '0') && (c <= '9')) add = c - '0';
         else {
