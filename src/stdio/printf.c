@@ -97,14 +97,14 @@ static int print_hex(unsigned long long val) {
 }
 
 int putchar(int c) {
-  platform_putchar(c);
-  return 0;
+    platform_putchar(c);
+    return 0;
 }
 
 int puts(const char *s) {
-  for ( ; *s; s++) putchar(*s);
-  putchar('\n');
-  return 0;
+    for ( ; *s; s++) putchar(*s);
+    putchar('\n');
+    return 0;
 }
 
 int printf(const char * restrict format, ...) {
