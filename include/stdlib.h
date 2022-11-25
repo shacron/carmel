@@ -8,5 +8,23 @@ void *calloc(size_t count, size_t size);
 void free(void *ptr);
 void *malloc(size_t size);
 
-int atoi(const char *str);
+int atoi(const char *s);
+long atol(const char *s);
 long strtol(const char *restrict s, char **restrict endptr, int base);
+
+int abs(int n);
+long int labs(long int n);
+
+typedef struct {
+    int quot;
+    int rem;
+} div_t;
+
+typedef struct {
+    long quot;
+    long rem;
+} ldiv_t;
+
+div_t div(int numer, int denom);
+ldiv_t ldiv(long numer, long denom);
+

@@ -28,8 +28,12 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-int atoi(const char *str) {
-    return (int)strtol(str, (char **)NULL, 10);
+int atoi(const char *s) {
+    return (int)strtol(s, (char **)NULL, 10);
+}
+
+long atol(const char *s) {
+    return strtol(s, (char **)NULL, 10);
 }
 
 long strtol(const char *restrict s, char **restrict endptr, int base) {
