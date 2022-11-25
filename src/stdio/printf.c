@@ -96,6 +96,10 @@ static int print_hex(unsigned long long val) {
     return count;
 }
 
+int getchar(void) {
+    return platform_getchar();
+}
+
 int putchar(int c) {
     platform_putchar(c);
     return 0;
