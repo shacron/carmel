@@ -5,6 +5,7 @@
 extern const char * const sys_errlist[];
 extern const int sys_nerr;
 
+int getchar(void);
 int putchar(int c);
 int puts(const char *s);
 

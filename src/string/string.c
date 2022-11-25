@@ -22,6 +22,7 @@
 
 // SPDX-License-Identifier: MIT License
 
+#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -95,6 +96,10 @@ char *strchr(const char *s, int c) {
     return (char *)s;
 }
 
+int strcoll(const char *s1, const char *s2) {
+    return strcmp(s1, s2);
+}
+
 int strcmp(const char *s1, const char *s2) {
     for ( ; ; s1++, s2++) {
         int result = (int)*s1 - (int)*s2;
@@ -103,8 +108,12 @@ int strcmp(const char *s1, const char *s2) {
     }
 }
 
-int strcoll(const char *s1, const char *s2) {
-    return strcmp(s1, s2);
+int strcasecmp(const char *s1, const char *s2) {
+    for ( ; ; s1++, s2++) {
+        int result = toupper((int)*s1) - toupper((int)*s2);
+        if (result != 0) return result;
+        if (*s1 == '\0') return 0;
+    }
 }
 
 char *strcpy(char *dst, const char *src) {
@@ -154,6 +163,15 @@ char *strncat(char *restrict s1, const char *restrict s2, size_t n) {
 int strncmp(const char *s1, const char *s2, size_t n) {
     for (size_t i = 0; i < n; i++) {
         int result = (int)s1[i] - (int)s2[i];
+        if (result != 0) return result;
+        if (s1[i] == '\0') break;
+    }
+    return 0;
+}
+
+int strncasecmp(const char *s1, const char *s2, size_t n) {
+    for (size_t i = 0; i < n; i++) {
+        int result = toupper(s1[i]) - toupper(s2[i]);
         if (result != 0) return result;
         if (s1[i] == '\0') break;
     }
