@@ -26,6 +26,14 @@
 
 #include <carmel/platform.h>
 
+void exit(int status) {
+    _Exit(status);
+}
+
+void _Exit(int status) {
+    platform_abort(0);
+}
+
 _Noreturn void abort(void) {
-    platform_abort();
+    platform_abort(1);
 }

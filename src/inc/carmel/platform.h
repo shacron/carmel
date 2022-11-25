@@ -6,4 +6,4 @@
 void platform_putchar(char c);
 
 // Exit the current execution
-_Noreturn void platform_abort(void);
+_Noreturn void platform_abort(int status);
