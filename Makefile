@@ -54,13 +54,14 @@ $(BLD_TARGET_INCDIR)/%.h: include/%.h
 	@mkdir -p $(dir $@)
 	@cp $^ $@
 
-ifeq ($(MAKECMDGOALS),install)
+ifeq ($(MAKECMDGOALS),$(filter $(MAKECMDGOALS),install install_headers))
 PUB_HEADERS := $(shell find include -name '*.h')
 PUB_HEADERS := $(PUB_HEADERS:include/%=$(BLD_TARGET_INCDIR)/%)
 endif
 
+install_headers: $(PUB_HEADERS)
 
-install: $(PUB_HEADERS) $(BLD_TARGET_LIBDIR)/libc.a
+install: install_headers $(BLD_TARGET_LIBDIR)/libc.a
 
 ############################################################
 # build rules
