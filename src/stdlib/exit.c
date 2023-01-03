@@ -31,7 +31,7 @@ void exit(int status) {
 }
 
 void _Exit(int status) {
-    platform_abort(0);
+    platform_abort(status);
 }
 
 _Noreturn void abort(void) {
