@@ -17,7 +17,8 @@ size_t strcspn(const char *s, const char *charset);
 char *strdup(const char *s);
 char *strerror(int errnum);
 char *strncat(char *restrict s1, const char *restrict s2, size_t n);
-char *strncpy(char *dst, const char *src, size_t len);
+char *strncpy(char *dst, const char *src, size_t n);
+char *strndup(const char *s, size_t n);
 size_t strlen(const char *s);
 int strncmp(const char *s1, const char *s2, size_t n);
 char *strpbrk(const char *s, const char *charset);
@@ -29,7 +30,3 @@ char *strstr(const char *haystack, const char *needle);
 char *strtok(char *restrict s, const char *restrict sep);
 #endif
 char *strtok_r(char *restrict s, const char *restrict sep, char **restrict lasts);
-
-// #if __BSD_EXT_STRING
-// char *strsep(char **stringp, const char *delim);
-// #endif

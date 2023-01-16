@@ -142,6 +142,17 @@ char *strdup(const char *s) {
     return d;
 }
 
+char *strndup(const char *s, size_t n) {
+    size_t len = strlen(s);
+    if (len > n) len = n;
+    char *d = malloc(len + 1);
+    if (d) {
+        memcpy(d, s, len);
+        d[len] = '\0';
+    }
+    return d;
+}
+
 size_t strlen(const char *s) {
     size_t i;
     for (i = 0; s[i] != '\0'; i++) ;
@@ -178,12 +189,12 @@ int strncasecmp(const char *s1, const char *s2, size_t n) {
     return 0;
 }
 
-char *strncpy(char *dst, const char *src, size_t len) {
+char *strncpy(char *dst, const char *src, size_t n) {
     size_t i;
-    for (i = 0; i < len; i++) {
+    for (i = 0; i < n; i++) {
         dst[i] = src[i];
         if (src[i] == '\0') {
-            for (i++; i < len; i++) dst[i] = '\0';
+            for (i++; i < n; i++) dst[i] = '\0';
             break;
         }
     }
