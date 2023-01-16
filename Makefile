@@ -31,9 +31,16 @@ CFILES :=
 # build config options
 ############################################################
 
-# todo, make this more dynamic
-DEFINES += -DCARMEL_UNSAFE_STRING=1 -DCARMEL_THREAD_LOCAL=1
+# config options list
+# C23 - include c23 standard functions
+# THREAD_LOCAL - runtime supports thread_local variables
+# UNSAFE_STRING - enable string functions that are unsafe
 
+OPTIONS := \
+	THREAD_LOCAL \
+	UNSAFE_STRING \
+
+DEFINES := $(addprefix -DCARMEL_,$(addsuffix =1,$(OPTIONS)))
 
 include $(SRCDIR)/build.mk
 
