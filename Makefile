@@ -4,12 +4,14 @@
 # higher-level make invocation, if present.
 ############################################################
 
+SDKDIR ?= ../sdk
 PROJECT := carmel
 SRCDIR := src
 
 BLD_BASEDIR ?= build
 BLD_TARGET_LIBDIR ?= $(BLD_BASEDIR)/lib
 BLD_TARGET_OBJDIR ?= $(BLD_BASEDIR)/obj
+BLD_HOST_OS ?= $(shell uname -s)
 
 BLD_TARGET_CFLAGS ?=
 PREFIX ?= export
@@ -22,6 +24,14 @@ INCLUDES := -Iinclude -I$(SRCDIR)/inc
 
 BLD_TARGET_CC ?= clang
 BLD_TARGET_AR ?= ar
+BLD_TARGET_NM ?= nm
+ifeq ($(BLD_HOST_OS),Darwin)
+# Unfortunately Xcode doesn't ship with a useful objcopy equivalent.
+# Use llvm-objcopy if present. This only affects the test build.
+BLD_TARGET_OBJCOPY ?= $(SDKDIR)/tools/Darwin/bin/llvm-objcopy
+else
+BLD_TARGET_OBJCOPY ?= objcopy
+endif
 
 CFLAGS := $(COMMON_FLAGS) $(BLD_TARGET_CFLAGS) -std=c11 -nostdinc
 CFILES :=
@@ -82,6 +92,19 @@ $(BLD_TARGET_OBJDIR)/%.c.o: %.c
 	@mkdir -p $(dir $@)
 	@echo " [cc]" $<
 	@$(BLD_TARGET_CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -o $@ -c $<
+
+############################################################
+# testable build rules
+############################################################
+
+RENAME_FILE := $(BLD_BASEDIR)/$(PROJECT)_rename.txt
+
+$(BLD_BASEDIR)/$(PROJECT)_test.a: $(BLD_BASEDIR)/$(PROJECT).a
+	@nm $^ | sed -n 's/[0-9a-f]* T \(_.*\)/\1 _carmel\1/p' > $(RENAME_FILE)
+	@$(BLD_TARGET_OBJCOPY) --redefine-syms=$(RENAME_FILE) $^ $@
+
+
+testable: $(BLD_BASEDIR)/$(PROJECT)_test.a
 
 ############################################################
 # clean rules
