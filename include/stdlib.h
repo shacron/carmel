@@ -33,3 +33,5 @@ typedef struct {
 div_t div(int numer, int denom);
 ldiv_t ldiv(long numer, long denom);
 
+void qsort(void *base, size_t num, size_t width, int (*compare)(const void *, const void *));
+

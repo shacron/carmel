@@ -18,7 +18,7 @@ PREFIX ?= export
 BLD_TARGET_INCDIR ?= $(PREFIX)/include
 BLD_TARGET_LIBDIR ?= $(PREFIX)/lib
 
-COMMON_FLAGS := -Wall -Wthread-safety -g -O3 -MMD
+COMMON_FLAGS := -Wall -Wthread-safety -g -O0 -MMD
 DEFINES :=
 INCLUDES := -Iinclude -I$(SRCDIR)/inc
 
@@ -91,6 +91,11 @@ $(BLD_BASEDIR)/$(PROJECT).a: $(OBJS)
 	@echo " [ar]" $(notdir $@)
 	@$(BLD_TARGET_AR) -cr $@ $^
 
+$(BLD_TARGET_OBJDIR)/test/%.c.o: test/%.c
+	@mkdir -p $(dir $@)
+	@echo " [cc]" $<
+	@$(BLD_TARGET_CC) $(TEST_CFLAGS) $(TEST_INCLUDES) -o $@ -c $<
+
 $(BLD_TARGET_OBJDIR)/%.c.o: %.c
 	@mkdir -p $(dir $@)
 	@echo " [cc]" $<
@@ -110,10 +115,7 @@ TEST_OBJS := $(TEST_OBJS:.c=.c.o)
 
 RENAME_FILE := $(BLD_BASEDIR)/$(PROJECT)_rename.txt
 
-$(BLD_TARGET_OBJDIR)/test/%.c.o: test/%.c
-	@mkdir -p $(dir $@)
-	@echo " [cc]" $<
-	@$(BLD_TARGET_CC) $(TEST_CFLAGS) $(TEST_INCLUDES) -o $@ -c $<
+
 
 $(BLD_BASEDIR)/$(PROJECT)_test.a: $(BLD_BASEDIR)/$(PROJECT).a
 	@nm $^ | sed -n 's/[0-9a-f]* T \(_.*\)/\1 _carmel\1/p' > $(RENAME_FILE)
