@@ -34,4 +34,4 @@ div_t div(int numer, int denom);
 ldiv_t ldiv(long numer, long denom);
 
 void qsort(void *base, size_t num, size_t width, int (*compare)(const void *, const void *));
-
+void qsort_r(void *base, size_t num, size_t width, void *thunk, int (*compare)(void *, const void *, const void *));
