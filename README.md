@@ -26,7 +26,7 @@ To cross-compile, override the build options in `Makefile` The makefile includes
         BLD_TARGET_AR=/path/to/llvm-ar \
         BLD_TARGET_CFLAGS="-target arm-linux-none -march=armv7 -mfloat-abi=hard"
 
-Other overrideable options can control the build output. See the makefile for details.
+Adding `BUILD=debug` to the make command line or your environment will build with code optimizations disabled, for better symbolic debugging. Other overrideable options can control the build output. See the makefile for details.
 
     make install
 
@@ -35,6 +35,12 @@ Installing copies the C standard headers as well as a copy of the static library
 ### Linking
 
 The linking code must provide an implementation of the platform functions defined in `src/inc/carmel/platform.h`. These perform platform-specific low-level tasks that cannot be implemented by this library.
+
+### Testing
+
+    make test
+
+This builds the test app for unit testing. The test target also builds a special version of the library named `carmel_test.a`. This library prefixes all public symbols with `carmel_` (ex: `carmel_strlen`). This allows the test app to call the standard system libc functions while testing.
 
 
 ## Questions
@@ -59,4 +65,4 @@ Definitely. Or you could talk to me about it.
 
 The code is licensed under the MIT License. The short version that you can use this code for any purpose, but should retain the copyright notice in the source.
 
-All code is copyright Shac Ron.
+All code is Copyright (c) 2022-2023 Shac Ron.

@@ -18,9 +18,19 @@ PREFIX ?= export
 BLD_TARGET_INCDIR ?= $(PREFIX)/include
 BLD_TARGET_LIBDIR ?= $(PREFIX)/lib
 
-COMMON_FLAGS := -Wall -Wthread-safety -g -O0 -MMD
+COMMON_FLAGS := -Wall -Wthread-safety -g -MMD
 DEFINES :=
 INCLUDES := -Iinclude -I$(SRCDIR)/inc
+
+# Select by choosing BUILD on the command line
+BUILD ?= release
+
+ifeq ($(BUILD),release)
+CFLAGS += -O3
+else
+CFLAGS += -O0
+DEFINES += -DBUILD_DEBUG=1
+endif
 
 BLD_TARGET_CC ?= clang
 BLD_TARGET_AR ?= ar
