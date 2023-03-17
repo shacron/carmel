@@ -18,7 +18,7 @@ PREFIX ?= export
 BLD_TARGET_INCDIR ?= $(PREFIX)/include
 BLD_TARGET_LIBDIR ?= $(PREFIX)/lib
 
-COMMON_FLAGS := -Wall -Wthread-safety -g -MMD
+COMMON_FLAGS := -Wall -Wthread-safety -g -MMD $(BLD_TARGET_CFLAGS)
 DEFINES :=
 INCLUDES := -Iinclude -I$(SRCDIR)/inc
 
