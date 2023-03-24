@@ -13,6 +13,7 @@
 #define FLAG_SIZE_T     (1u << 3)
 #define FLAG_UNSIGNED   (1u << 4)
 #define FLAG_HEX        (1u << 5)
+#define FLAG_HEXPREFIX  (1u << 6)
 
 static int print_unsigned_decimal(unsigned long long num);
 
@@ -50,10 +51,17 @@ static int print_unsigned_decimal(unsigned long long num) {
     return count;
 }
 
-static int print_hex(unsigned long long val) {
+static int print_hex(unsigned int flags, unsigned long long val) {
     int i;
     const int val_chars = 2 * sizeof(val);
     const int val_bits = sizeof(val) * CHAR_BIT;
+    int count = 0;
+
+    if (flags & FLAG_HEXPREFIX) {
+        putchar('0');
+        putchar('x');
+        count = 2;
+    }
 
     // consume leading zeros
     for (i = 0; i < val_chars; i++) {
@@ -66,7 +74,7 @@ static int print_hex(unsigned long long val) {
         return 1;
     }
 
-    int count = val_chars - i;
+    count += val_chars - i;
     for ( ; i < val_chars; i++) {
         unsigned char c = (unsigned char)(val >> (val_bits - 4));
         val <<= 4;
@@ -129,6 +137,10 @@ next_flag:
             continue;
 
         // flag characters
+        case '#':
+            flags |= FLAG_HEXPREFIX;
+            goto next_flag;
+
         case 'l':
             if (flags & FLAG_LONG) flags |= FLAG_LONG_LONG;
             else flags |= FLAG_LONG;
@@ -175,12 +187,12 @@ next_flag:
             break;
 
         case 'p':
-            flags = FLAG_LONG;
+            flags = FLAG_LONG | FLAG_HEXPREFIX;
         case 'x':
             if (flags & FLAG_LONG_LONG) arg = va_arg(ap, unsigned long long);
             else if (flags & FLAG_LONG) arg = va_arg(ap, unsigned long);
             else arg = va_arg(ap, unsigned int);
-            count += print_hex(arg);
+            count += print_hex(flags, arg);
             break;
         }
     }
