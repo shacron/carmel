@@ -1,6 +1,7 @@
 
 CFILES += \
 	$(SRCDIR)/ctype.c \
+	$(SRCDIR)/stdatomic.c \
 	$(SRCDIR)/stdio/printf.c \
 	$(SRCDIR)/stdio/stdio.c \
 	$(SRCDIR)/stdlib/exit.c \
