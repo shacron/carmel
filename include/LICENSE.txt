@@ -1,0 +1,3 @@
+Public Domain Copyright Release
+
+All headers files found in the /include directory are placed in the public domain by the copyright holder (Shac Ron). This code may be used for any purpose with no additional requirements or restrictions.

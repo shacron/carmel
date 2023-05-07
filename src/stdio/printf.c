@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT License
-// Copyright (c) 2022 Shac Ron
+// Copyright (c) 2022-2023 Shac Ron
 
 #include <limits.h>
 #include <stddef.h>

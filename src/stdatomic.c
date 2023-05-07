@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT License
+// Copyright (c) 2023 Shac Ron
+
 #include <stdatomic.h>
 
 #ifdef atomic_thread_fence
