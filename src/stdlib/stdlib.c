@@ -13,6 +13,11 @@ long labs(long n) {
     return n;
 }
 
+long long llabs(long long n) {
+    if (n < 0) return -n;
+    return n;
+}
+
 div_t div(int numer, int denom) {
     div_t d;
     d.quot = numer / denom;

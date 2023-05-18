@@ -18,7 +18,8 @@ long atol(const char *s);
 long strtol(const char *restrict s, char **restrict endptr, int base);
 
 int abs(int n);
-long int labs(long int n);
+long int labs(long n);
+long long llabs(long long n);
 
 typedef struct {
     int quot;
