@@ -1,84 +1,138 @@
 // SPDX-License-Identifier: MIT License
 // Copyright (c) 2022-2023 Shac Ron
 
+#include <stdbool.h>
 #include <limits.h>
 #include <stddef.h>
 #include <stdio.h>
 
 #include <carmel/platform.h>
 
-#define FLAG_LONG       (1u << 0)
-#define FLAG_LONG_LONG  (1u << 1)
-#define FLAG_CHAR       (1u << 2)
-#define FLAG_SIZE_T     (1u << 3)
-#define FLAG_UNSIGNED   (1u << 4)
-#define FLAG_HEX        (1u << 5)
-#define FLAG_HEXPREFIX  (1u << 6)
+// data type
+#define TYPE_CHAR           (0)
+#define TYPE_SIGNED         (1)
+#define TYPE_UNSIGNED       (2)
+#define TYPE_STRING         (3)
+#define TYPE_ESCAPE         (4)
 
-static int print_unsigned_decimal(unsigned long long num);
+// format options
+#define FLAG_LONG           (1u << 0)
+#define FLAG_LONG_LONG      (1u << 1)
+#define FLAG_HEX            (1u << 2)
+#define FLAG_HEXPREFIX      (1u << 3)
+#define FLAG_ZEROPAD        (1u << 4)
 
-static char hexchar(unsigned char c) {
+typedef struct {
+    unsigned char type;
+    unsigned char flags;
+    unsigned int length;
+    unsigned int pad;
+} format_t;
+
+static int print_decimal(format_t *f, unsigned long long num, bool neg);
+
+static inline char hexchar(unsigned char c) {
     if (c < 10) return '0' + c;
     return 'a' + c - 10;
 }
 
-static int print_signed_decimal(long long num) {
-    int count = 0;
+static int print_signed_decimal(format_t *f, long long num) {
+    bool neg = false;
     if (num < 0) {
-        putchar('-');
-        count = 1;
+        neg = true;
         num = 0 - num;
     }
-    return print_unsigned_decimal(num) + count;
+    return print_decimal(f, num, neg);
 }
 
-static int print_unsigned_decimal(unsigned long long num) {
+static inline int print_unsigned_decimal(format_t *f, unsigned long long num) {
+    return print_decimal(f, num, false);
+}
+
+static int print_decimal(format_t *f, unsigned long long num, bool neg) {
     if (num == 0) {
         putchar('0');
         return 1;
     }
-    int count;
-    unsigned char dec[40];
 
-    for (count = 0; num; count++) {
+    int i;
+    int count = 0;
+    unsigned char dec[32];  // 2^64 = 20 decimal characters
+
+    for (i = 0; num; i++) {
         unsigned char c = num % 10;
         num = num / 10;
-        dec[count] = '0' + c;
+        dec[i] = '0' + c;
     }
-    for (int i = count - 1; i >= 0; i--) {
-        putchar(dec[i]);
+    if (neg) {
+        dec[i] = '-';
+        i++;
+    }
+    if (f->pad > i) {
+        if (neg && (f->flags & FLAG_ZEROPAD)) {
+            putchar('-');
+            count++;
+            i--;
+            f->pad--;
+        }
+        const char pad_char = (f->flags & FLAG_ZEROPAD) ? '0' : ' ';
+        for (int pad = f->pad; pad > i; pad--) {
+            putchar(pad_char);
+            count++;
+        }
+    }
+    for (int s = i - 1; s >= 0; s--) {
+        putchar(dec[s]);
+        count++;
     }
     return count;
 }
 
-static int print_hex(unsigned int flags, unsigned long long val) {
-    int i;
-    const int val_chars = 2 * sizeof(val);
+static int print_hex(format_t *f, unsigned long long val) {
     const int val_bits = sizeof(val) * CHAR_BIT;
     int count = 0;
+    int num_chars = 1;
+    const char pad_char = (f->flags & FLAG_ZEROPAD) ? '0' : ' ';
 
-    if (flags & FLAG_HEXPREFIX) {
+    if (val != 0) num_chars = ((val_bits - __builtin_clzll(val)) + 3) / 4;
+
+    if ((f->flags & FLAG_HEXPREFIX) == 0) {
+        for (unsigned int pad = f->pad; pad > num_chars; pad--) {
+            putchar(pad_char);
+            count++;
+        }
+        goto print_num;
+    }
+    if (f->flags & FLAG_ZEROPAD) {
         putchar('0');
         putchar('x');
-        count = 2;
+        count += 2;
+        for (unsigned int pad = f->pad; pad > num_chars + 2; pad--) {
+            putchar(pad_char);
+            count++;
     }
-
-    // consume leading zeros
-    for (i = 0; i < val_chars; i++) {
-        unsigned char c = (unsigned char)(val >> (val_bits - 4));
-        if (c != 0) break;
-        val <<= 4;
-    }
-    if (i == val_chars) {
+    } else {
+        for (unsigned int pad = f->pad; pad > num_chars + 2; pad--) {
+            putchar(pad_char);
+            count++;
+        }
         putchar('0');
-        return 1;
+        putchar('x');
+        count += 2;
     }
 
-    count += val_chars - i;
-    for ( ; i < val_chars; i++) {
-        unsigned char c = (unsigned char)(val >> (val_bits - 4));
-        val <<= 4;
-        putchar(hexchar(c));
+print_num:
+    if (val == 0) {
+        putchar('0');
+        count++;
+    } else {
+        val <<= (val_bits - (num_chars * 4));
+        for (int s = 0; s < num_chars; s++) {
+            unsigned char c = (unsigned char)(val >> (val_bits - 4));
+            val <<= 4;
+            putchar(hexchar(c));
+            count++;
+        }
     }
     return count;
 }
@@ -98,6 +152,79 @@ int puts(const char *s) {
     return 0;
 }
 
+static int parse_format(format_t *f, const char *s) {
+    unsigned int i = 0;
+
+    if (s[i] != '%') return -1;
+    i++;
+
+    if (s[i] == '\0') return -1;
+    if (s[i] == '%') {
+        f->length = i+1;
+        f->flags = TYPE_ESCAPE;
+        return 0;
+    }
+    if (s[i] == '#') {
+        f->flags = FLAG_HEXPREFIX;
+        i++;
+    }
+    if (s[i] == '0') {
+        f->flags |= FLAG_ZEROPAD;
+        i++;
+    }
+
+    while ((s[i] >= '0') && (s[i] <= '9')) {
+        f->pad = (f->pad * 10) + (s[i] - '0');
+        i++;
+    }
+    if (s[i] == '\0') return -1;
+
+    // z or ll qualifiers
+    if (s[i] == 'z') {
+        f->flags |= FLAG_LONG;
+        i++;
+    } else if (s[i] == 'l') {
+        f->flags |= FLAG_LONG;
+        i++;
+        if (s[i] == 'l') {
+            f->flags |= FLAG_LONG_LONG;
+            i++;
+        }
+    }
+    if (s[i] == '\0') return -1;
+
+    switch (s[i]) {
+    case 'c':
+        f->type = TYPE_CHAR;
+        break;
+
+    case 'd':
+    case 'i':
+        f->type = TYPE_SIGNED;
+        break;
+
+    case 'x':
+        f->flags |= FLAG_HEX;
+    case 'u':
+        f->type = TYPE_UNSIGNED;
+        break;
+
+    case 's':
+        f->type = TYPE_STRING;
+        break;
+
+    case 'p':
+        f->type = TYPE_UNSIGNED;
+        f->flags |= FLAG_HEX | FLAG_LONG;
+        break;
+
+    default:
+        return -1;
+    }
+    f->length = i + 1;
+    return 0;
+}
+
 int printf(const char * restrict format, ...) {
     va_list ap;
     va_start(ap, format);
@@ -107,92 +234,74 @@ int printf(const char * restrict format, ...) {
 }
 
 int vprintf(const char * restrict format, va_list ap) {
-    const char *f = format;
+    const char *s = format;
+    int i = 0;
     int count = 0;
+
     for ( ; ; ) {
-        char b, a = *f;
-        if (a == '\0') return count;
-        f++;
-
-        if (a != '%') {
-            putchar(a);
+        if (s[i] == '\0') return count;
+        if (s[i] != '%') {
+            putchar(s[i]);
+            i++;
             count++;
             continue;
         }
+        format_t f = {};
+        if (parse_format(&f, s+i)) {
+            putchar('%');
+            count++;
+            i++;
+            continue;
+        }
 
-        unsigned int flags = 0;
         unsigned long long arg;
-
-next_flag:
-        b = *f;
-        f++;
-
-        switch (b) {
-        case '\0': return count;
-
-        case '%':
-        default:
-            putchar(b);
-            count++;
-            continue;
-
-        // flag characters
-        case '#':
-            flags |= FLAG_HEXPREFIX;
-            goto next_flag;
-
-        case 'l':
-            if (flags & FLAG_LONG) flags |= FLAG_LONG_LONG;
-            else flags |= FLAG_LONG;
-            goto next_flag;
-
-        case 'z':
-            flags |= FLAG_LONG; // todo FLAG_SIZE_T
-            goto next_flag;
-
-        // format characters
-
-        case 's':
-        {
-            char *s = va_arg(ap, char *);
-            if (s == NULL) s = "<NULL>";
-            for ( ; *s; s++) putchar(*s);
-            break;
-        }
-
-        case 'c':
+        switch (f.type) {
+        case TYPE_CHAR:
         {
             int c = va_arg(ap, int);
             putchar(c);
             count++;
+            i += f.length;
             break;
         }
 
-        case 'd':
-        case 'i':
+        case TYPE_SIGNED:
         {
             long long sarg;
-            if (flags & FLAG_LONG_LONG) sarg = va_arg(ap, long long);
-            else if (flags & FLAG_LONG) sarg = va_arg(ap, long);
+            if (f.flags & FLAG_LONG_LONG) sarg = va_arg(ap, long long);
+            else if (f.flags & FLAG_LONG) sarg = va_arg(ap, long);
             else sarg = va_arg(ap, int);
-            count += print_signed_decimal(sarg);
+            count += print_signed_decimal(&f, sarg);
+            i += f.length;
             break;
         }
 
-        case 'u':
-            if (flags & FLAG_LONG_LONG) arg = va_arg(ap, unsigned long long);
-            else if (flags & FLAG_LONG) arg = va_arg(ap, unsigned long);
+        case TYPE_UNSIGNED:
+            if (f.flags & FLAG_LONG_LONG) arg = va_arg(ap, unsigned long long);
+            else if (f.flags & FLAG_LONG) arg = va_arg(ap, unsigned long);
             else arg = va_arg(ap, unsigned int);
-            count += print_unsigned_decimal(arg);
+            if (f.flags & FLAG_HEX) {
+                count += print_hex(&f, arg);
+            } else {
+                count += print_unsigned_decimal(&f, arg);
+            }
+            i += f.length;
             break;
 
-        case 'p':
-            flags = FLAG_LONG | FLAG_HEXPREFIX;
-        case 'x':
-            if (flags & FLAG_LONG_LONG) arg = va_arg(ap, unsigned long long);
-            else if (flags & FLAG_LONG) arg = va_arg(ap, unsigned long);
-            else arg = va_arg(ap, unsigned int);
-            count += print_hex(flags, arg);
+        case TYPE_STRING:
+        {
+            char *s = va_arg(ap, char *);
+            if (s == NULL) s = "<NULL>";
+            for ( ; *s; s++) putchar(*s);
+            i += f.length;
+            break;
+        }
+
+        default:
+        case TYPE_ESCAPE:
+            putchar('%');
+            count++;
+            i += f.length;
             break;
         }
     }
