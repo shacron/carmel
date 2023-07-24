@@ -9,18 +9,19 @@
 #include <carmel/platform.h>
 
 // data type
-#define TYPE_CHAR           (0)
-#define TYPE_SIGNED         (1)
-#define TYPE_UNSIGNED       (2)
-#define TYPE_STRING         (3)
-#define TYPE_ESCAPE         (4)
+#define TYPE_CHAR           (0) // c
+#define TYPE_SIGNED         (1) // d,i
+#define TYPE_UNSIGNED       (2) // u
+#define TYPE_STRING         (4) // s
+#define TYPE_ESCAPE         (5) // %
 
 // format options
-#define FLAG_LONG           (1u << 0)
-#define FLAG_LONG_LONG      (1u << 1)
-#define FLAG_HEX            (1u << 2)
-#define FLAG_HEXPREFIX      (1u << 3)
-#define FLAG_ZEROPAD        (1u << 4)
+#define FLAG_LONG           (1u << 0)   // l
+#define FLAG_LONG_LONG      (1u << 1)   // ll
+#define FLAG_HEX            (1u << 2)   // x (u implicit)
+#define FLAG_OCTOTHORPE     (1u << 3)   // #
+#define FLAG_OCTAL          (1u << 4)   // o
+#define FLAG_ZEROPAD        (1u << 5)   // 0
 
 typedef struct {
     unsigned char type;
@@ -89,14 +90,22 @@ static int print_decimal(format_t *f, unsigned long long num, bool neg) {
 }
 
 static int print_hex(format_t *f, unsigned long long val) {
-    const int val_bits = sizeof(val) * CHAR_BIT;
-    int count = 0;
-    int num_chars = 1;
     const char pad_char = (f->flags & FLAG_ZEROPAD) ? '0' : ' ';
+    int count = 0;
 
-    if (val != 0) num_chars = ((val_bits - __builtin_clzll(val)) + 3) / 4;
+    if (val == 0) {
+        for (unsigned int pad = f->pad; pad > 1 ; pad--) {
+            putchar(pad_char);
+            count++;
+        }
+        putchar('0');
+        return count;
+    }
 
-    if ((f->flags & FLAG_HEXPREFIX) == 0) {
+    const int val_bits = sizeof(val) * CHAR_BIT;
+    const int num_chars = ((val_bits - __builtin_clzll(val)) + 3) / 4;
+
+    if ((f->flags & FLAG_OCTOTHORPE) == 0) {
         for (unsigned int pad = f->pad; pad > num_chars; pad--) {
             putchar(pad_char);
             count++;
@@ -110,7 +119,7 @@ static int print_hex(format_t *f, unsigned long long val) {
         for (unsigned int pad = f->pad; pad > num_chars + 2; pad--) {
             putchar(pad_char);
             count++;
-    }
+        }
     } else {
         for (unsigned int pad = f->pad; pad > num_chars + 2; pad--) {
             putchar(pad_char);
@@ -122,17 +131,70 @@ static int print_hex(format_t *f, unsigned long long val) {
     }
 
 print_num:
-    if (val == 0) {
-        putchar('0');
+    val <<= (val_bits - (num_chars * 4));
+    for (int s = 0; s < num_chars; s++) {
+        unsigned char c = (unsigned char)(val >> (val_bits - 4));
+        val <<= 4;
+        putchar(hexchar(c));
         count++;
-    } else {
-        val <<= (val_bits - (num_chars * 4));
-        for (int s = 0; s < num_chars; s++) {
-            unsigned char c = (unsigned char)(val >> (val_bits - 4));
-            val <<= 4;
-            putchar(hexchar(c));
+    }
+    return count;
+}
+
+static int print_octal(format_t *f, unsigned long long val) {
+    int count = 0;
+    const char pad_char = (f->flags & FLAG_ZEROPAD) ? '0' : ' ';
+
+    if (val == 0) {
+        for (unsigned int pad = f->pad; pad > 1 ; pad--) {
+            putchar(pad_char);
             count++;
         }
+        putchar('0');
+        return count;
+    }
+
+    const int val_bits = sizeof(val) * CHAR_BIT;
+    int num_chars = ((val_bits - __builtin_clzll(val)) + 2) / 3;
+    const int leading = val_bits - (val_bits % 3);
+
+    if ((f->flags & FLAG_OCTOTHORPE) == 0) {
+        for (unsigned int pad = f->pad; pad > num_chars; pad--) {
+            putchar(pad_char);
+            count++;
+        }
+        goto print_num;
+    }
+    if (f->flags & FLAG_ZEROPAD) {
+        putchar('0');
+        count++;
+        for (unsigned int pad = f->pad; pad > num_chars + 1; pad--) {
+            putchar('0');
+            count++;
+        }
+    } else {
+        for (unsigned int pad = f->pad; pad > num_chars + 1; pad--) {
+            putchar(' ');
+            count++;
+        }
+        putchar('0');
+        count++;
+    }
+
+print_num:
+    if ((num_chars * 3) > val_bits) {
+        unsigned char c = (unsigned char)(val >> (val_bits - leading));
+        val <<= leading;
+        num_chars--;
+        putchar(c + '0');
+    } else {
+        val <<= (val_bits - (num_chars * 3));
+    }
+    for (int s = 0; s < num_chars; s++) {
+        unsigned char c = (unsigned char)(val >> (val_bits - 3));
+        val <<= 3;
+        putchar(c + '0');
+        count++;
     }
     return count;
 }
@@ -165,7 +227,7 @@ static int parse_format(format_t *f, const char *s) {
         return 0;
     }
     if (s[i] == '#') {
-        f->flags = FLAG_HEXPREFIX;
+        f->flags = FLAG_OCTOTHORPE;
         i++;
     }
     if (s[i] == '0') {
@@ -201,6 +263,11 @@ static int parse_format(format_t *f, const char *s) {
     case 'd':
     case 'i':
         f->type = TYPE_SIGNED;
+        break;
+
+    case 'o':
+        f->flags |= FLAG_OCTAL;
+        f->type = TYPE_UNSIGNED;
         break;
 
     case 'x':
@@ -282,6 +349,8 @@ int vprintf(const char * restrict format, va_list ap) {
             else arg = va_arg(ap, unsigned int);
             if (f.flags & FLAG_HEX) {
                 count += print_hex(&f, arg);
+            } else if (f.flags & FLAG_OCTAL) {
+                count += print_octal(&f, arg);
             } else {
                 count += print_unsigned_decimal(&f, arg);
             }
