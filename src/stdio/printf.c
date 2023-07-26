@@ -5,6 +5,7 @@
 #include <limits.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <stdint.h>
 
 #include <carmel/platform.h>
 
@@ -14,6 +15,7 @@
 #define TYPE_UNSIGNED       (2) // u
 #define TYPE_STRING         (4) // s
 #define TYPE_ESCAPE         (5) // %
+#define TYPE_FLOAT          (6) // fF
 
 // format options
 #define FLAG_LONG           (1u << 0)   // l
@@ -35,6 +37,12 @@ static int print_decimal(format_t *f, unsigned long long num, bool neg);
 static inline char hexchar(unsigned char c) {
     if (c < 10) return '0' + c;
     return 'a' + c - 10;
+}
+
+static int put_string(const char *s) {
+    int i;
+    for (i = 0; s[i] != 0; i++) putchar(s[i]);
+    return i;
 }
 
 static int print_signed_decimal(format_t *f, long long num) {
@@ -199,6 +207,86 @@ print_num:
     return count;
 }
 
+static int print_float(format_t *f, uint64_t val) {
+    bool neg = (val >> 63);
+    int exp = (val >> 52) & 0x7ff;
+    uint64_t frac = (val & 0xfffffffffffff);
+    int count = 0;
+
+    if (exp == 0) {
+        if (frac == 0) {
+            if (neg) {
+                putchar('-');
+                count++;
+            }
+            putchar('0');
+            return count + 1;
+        } else {
+            // subnormal...
+
+            // todo
+        }
+    }
+
+    if (exp == 0x7ff) {
+        if (frac == 0) {
+            if (neg) {
+                putchar('-');
+                count = 1;
+            }
+            count += put_string("inf");
+        }
+        else count = put_string("nan");
+        return count;
+    }
+
+    if (neg) {
+        putchar('-');
+        count = 1;
+    }
+
+    exp -= 1023;
+    // s    exp     frac
+    // [63] [62:52] [51:0]
+
+    // shift binary point if possible
+    uint64_t whole = 0;
+    uint64_t part = 0;
+
+    if (exp >= 0) {
+        int bp = 52 - exp;     // binary point
+
+        // todo: check overshift
+        whole = frac >> bp;
+        whole |= (1ull << exp);
+
+        part = (frac << (12 + bp)) >> (12 + bp); // clear whole part
+    } else {
+        exp = -exp;
+        part = frac >> exp;
+        part |= (1ull << (52 - exp));
+    }
+
+    format_t dec = {};
+    dec.type = TYPE_UNSIGNED;
+    dec.flags = FLAG_LONG_LONG;
+    count += print_unsigned_decimal(&dec, whole);
+    putchar('.');
+    count++;
+
+    // convert binary fraction to decimal fraction
+
+    uint64_t sum = 0;
+    // factor covers 62 bits of precision
+    // 0x4563918244f40000 = 5000000000000000000
+    for (uint64_t factor = 0x4563918244f40000; part > 0; factor >>= 1) {
+        if (part & (1ull << 51)) sum += factor;
+        part <<= 1;
+    }
+    count += print_unsigned_decimal(&dec, sum);
+    return count;
+}
+
 int getchar(void) {
     return platform_getchar();
 }
@@ -265,24 +353,29 @@ static int parse_format(format_t *f, const char *s) {
         f->type = TYPE_SIGNED;
         break;
 
+    case 'f':
+    case 'F':
+        f->type = TYPE_FLOAT;
+        break;
+
     case 'o':
         f->flags |= FLAG_OCTAL;
         f->type = TYPE_UNSIGNED;
         break;
 
-    case 'x':
-        f->flags |= FLAG_HEX;
-    case 'u':
+    case 'p':
         f->type = TYPE_UNSIGNED;
+        f->flags |= FLAG_HEX | FLAG_LONG;
         break;
 
     case 's':
         f->type = TYPE_STRING;
         break;
 
-    case 'p':
+    case 'x':
+        f->flags |= FLAG_HEX;
+    case 'u':
         f->type = TYPE_UNSIGNED;
-        f->flags |= FLAG_HEX | FLAG_LONG;
         break;
 
     default:
@@ -362,6 +455,14 @@ int vprintf(const char * restrict format, va_list ap) {
             char *s = va_arg(ap, char *);
             if (s == NULL) s = "<NULL>";
             for ( ; *s; s++) putchar(*s);
+            i += f.length;
+            break;
+        }
+
+        case TYPE_FLOAT:
+        {
+            uint64_t farg = va_arg(ap, uint64_t);
+            print_float(&f, farg);
             i += f.length;
             break;
         }
