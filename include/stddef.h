@@ -15,4 +15,10 @@ typedef __PTRDIFF_TYPE__ ptrdiff_t;
 typedef unsigned long ptrdiff_t;
 #endif
 
+#ifdef __BIGGEST_ALIGNMENT__
+typedef struct { int x; } max_align_t __attribute__((aligned(__BIGGEST_ALIGNMENT__)));
+#else
+typedef unsigned long long max_align_t;
+#endif
+
 #define offsetof(t,m) __builtin_offsetof(t,m)
