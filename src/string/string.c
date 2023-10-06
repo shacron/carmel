@@ -2,8 +2,14 @@
 // Copyright (c) 2022-2023 Shac Ron
 
 #include <ctype.h>
+#include <stddef.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+
+#if CARMEL_UNOPTIMIZED_MEM
+#define CARMEL_UNOPTIMIZED_MEMSET 1
+#endif
 
 void *memccpy(void *restrict dst, const void *restrict src, int c, size_t n) {
     char *d = dst;
@@ -56,9 +62,76 @@ void *memmove(void *dst, const void *src, size_t len) {
 }
 
 void *memset(void *b, int c, size_t len) {
+#if CARMEL_UNOPTIMIZED_MEMSET
     unsigned char *d = b;
     for (size_t i = 0; i < len; i++) d[i] = (unsigned char)c;
     return b;
+#else
+    // this code optimizes for aligned 64-bit writes on platforms where
+    // __LP64__ is defined, and aligned 32-bit writes otherwise.
+    // It assumes that sizeof(long) is 8 or 4, respectively for those cases.
+    // If this is not true for your platform, CARMEL_UNOPTIMIZED_MEMSET will
+    // give a working implementation.
+
+    unsigned char *d = b;
+    const unsigned char v = c;
+    const uint32_t align = sizeof(long);
+
+    unsigned long val = v;
+    val |= val << 8;
+    val |= val << 16;
+#if __LP64__
+    val |= val << 32;
+#endif
+
+    if (len < align) {
+        if (((uintptr_t)d & ((align >> 1) - 1)) == 0) goto aligned_tail;
+        for (size_t i = 0; i < len; i++) d[i] = v;
+        return b;
+    }
+
+    if (((uintptr_t)d & (align - 1)) == 0) goto aligned_write;
+
+    // align destination buffer
+    uint32_t leading = align - ((uintptr_t)d & (align - 1));
+    len -= leading;
+    if (leading & 1) {
+        *d = v;
+        d++;
+    }
+    if (leading & 2) {
+        *(uint16_t *)d = val;
+        d += 2;
+    }
+#if __LP64__
+    if (leading & 4) {
+        *(uint32_t *)d = val;
+        d += 4;
+    }
+#endif
+
+aligned_write:
+    for ( ; len >= align; len -= align) {
+        *(unsigned long *)d = val;
+        d += align;
+    }
+    if (len == 0) return b;
+
+aligned_tail:
+#if __LP64__
+    if (len & 4) {
+        *(uint32_t *)d = val;
+        d += 4;
+    }
+#endif
+    if (len & 2) {
+        *(uint16_t *)d = val;
+        d += 2;
+    }
+    if (len & 1)
+        *d = v;
+    return b;
+#endif // CARMEL_UNOPTIMIZED_MEMSET
 }
 
 char *strcat(char *restrict s1, const char *restrict s2) {
