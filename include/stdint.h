@@ -78,6 +78,7 @@ typedef __UINTMAX_TYPE__ uintmax_t;
 #define PTRDIFF_MIN (ptrdiff_t)(PTRDIFF_MAX + 1)
 #define SIG_ATOMIC_MIN (sig_atomic_t)(SIG_ATOMIC_MAX + 1)
 #define WCHAR_MIN (wchar_t)(WCHAR_MAX + 1)
+#define WINT_MIN (wint_t)(WINT_MAX + 1)
 
 #define INT8_C(v)   (int8_t)(v)
 #define INT16_C(v)  (int16_t)(v)
