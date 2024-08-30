@@ -65,4 +65,6 @@ Definitely. Or you could talk to me about it.
 
 The code is licensed under the MIT License. The short version that you can use this code for any purpose, but should retain the copyright notice in the source.
 
-All code is Copyright (c) 2022-2023 Shac Ron.
+Standard header files in this repository are hereby placed in the public domain. They may be used for any purpose with no attribution.
+
+All code is Copyright (c) 2022-2024 Shac Ron.
