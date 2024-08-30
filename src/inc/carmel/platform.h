@@ -4,8 +4,8 @@
 
 // Write a single character to the to output stream
 void platform_putchar(char c);
-// Read a single character from the output stream
+// Read a single character from the input stream
 int platform_getchar(void);
 
-// Exit the current execution
+// Exit the current execution context
 _Noreturn void platform_abort(int status);
