@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if __clang__
 
 typedef __INT8_TYPE__   int8_t;
@@ -91,3 +95,7 @@ typedef __UINTMAX_TYPE__ uintmax_t;
 
 #define INTMAX_C(v)  (intmax_t)(v)
 #define UINTMAX_C(v) (uintmax_t)(v)
+
+#ifdef __cplusplus
+}
+#endif

@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if __clang__
 
 #define PRId8 __INT8_FMTd__
@@ -99,4 +103,8 @@
 
 #error unknown compiler
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif

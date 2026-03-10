@@ -2,6 +2,11 @@
 
 #include <stdarg.h>
 
+#ifdef __cplusplus
+extern "C" {
+#define restrict __restrict
+#endif
+
 extern const char * const sys_errlist[];
 extern const int sys_nerr;
 
@@ -13,3 +18,7 @@ int printf(const char * restrict format, ...) __attribute__((__format__ (__print
 int vprintf(const char * restrict format, va_list ap);
 
 void perror(const char *s);
+
+#ifdef __cplusplus
+}
+#endif

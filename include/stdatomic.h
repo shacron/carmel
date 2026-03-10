@@ -3,6 +3,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if __clang__
 
 #define ATOMIC_BOOL_LOCK_FREE       __CLANG_ATOMIC_BOOL_LOCK_FREE
@@ -106,3 +110,6 @@ void atomic_signal_fence(memory_order ord);
 
 #endif  // __clang__
 
+#ifdef __cplusplus
+}
+#endif

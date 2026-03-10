@@ -1,6 +1,10 @@
 #pragma once
 
-// This file is supposed redundantly declare
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+// This file is supposed to redundantly declare
 // NULL, WCHAR_MIN/MAX, and size_t.
 // Only WCHAR_MIN and MAX have been duplicated here.
 // WINT_MIN/MAX are (insanely) defined in stdint.h.
@@ -19,4 +23,8 @@ typedef __WINT_TYPE__  wint_t;
 
 #define WCHAR_MIN (wchar_t)(WCHAR_MAX + 1)
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif

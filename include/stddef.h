@@ -1,6 +1,14 @@
 #pragma once
 
+#ifdef __cplusplus
+#define NULL nullptr
+#else
 #define NULL ((void *)0)
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #ifdef __SIZE_TYPE__
 typedef __SIZE_TYPE__ size_t;
@@ -22,3 +30,7 @@ typedef unsigned long long max_align_t;
 #endif
 
 #define offsetof(t,m) __builtin_offsetof(t,m)
+
+#ifdef __cplusplus
+}
+#endif

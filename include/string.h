@@ -2,6 +2,11 @@
 
 #include <stddef.h>
 
+#ifdef __cplusplus
+extern "C" {
+#define restrict __restrict
+#endif
+
 void *memccpy(void *restrict dst, const void *restrict src, int c, size_t n);
 void *memchr(const void *s, int c, size_t n);
 int memcmp(const void *s1, const void *s2, size_t n);
@@ -30,3 +35,7 @@ char *strstr(const char *haystack, const char *needle);
 char *strtok(char *restrict s, const char *restrict sep);
 #endif
 char *strtok_r(char *restrict s, const char *restrict sep, char **restrict lasts);
+
+#ifdef __cplusplus
+}
+#endif

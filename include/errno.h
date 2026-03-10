@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if CARMEL_THREAD_LOCAL
 _Thread_local int errno;
 #else
@@ -116,3 +120,7 @@ _Thread_local int errno;
 #define EOWNERDEAD      105     // Previous owner died
 #define EQFULL          106     // Interface output queue is full
 #define ELAST           106     // Must be equal largest errno
+
+#ifdef __cplusplus
+}
+#endif

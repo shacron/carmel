@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int digittoint(int c);
 int isalnum(int c);
 int isalpha(int c);
@@ -22,3 +26,7 @@ int isupper(int c);
 int toascii(int c);
 int tolower(int c);
 int toupper(int c);
+
+#ifdef __cplusplus
+}
+#endif
