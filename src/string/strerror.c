@@ -1,9 +1,13 @@
 // SPDX-License-Identifier: MIT License
-// Copyright (c) 2022 Shac Ron
+// Copyright (c) 2022-2026 Shac Ron
 
 #include <errno.h>
 #include <string.h>
 #include <stdio.h>
+
+#if CARMEL_THREAD_LOCAL
+_Thread_local int errno;
+#endif
 
 // Darwin errlist
 const char * const sys_errlist[] = {

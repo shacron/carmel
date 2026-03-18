@@ -5,7 +5,7 @@ extern "C" {
 #endif
 
 #if CARMEL_THREAD_LOCAL
-_Thread_local int errno;
+extern _Thread_local int errno;
 #else
 #include <carmel/platform.h>
 #define errno (*platform_errno_for_thread());
