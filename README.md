@@ -1,11 +1,11 @@
 # Carmel
 
 ## Warning
-This is a WORK IN PROGRESS. If you are looking for production-ready code, there are much better candidates than this project.
+This is a WORK IN PROGRESS. If you are looking for production-ready code, there are better candidates than this project.
 
 ## A simple C standard library
 
-This project contains a basic, partial implementation of the C standard library. The intended use is for embedded targets and other low-overhead code. As such, it does not plan to support localization, time zones, math libraries, and other big-system things. The implemented functions are very basic and unoptimized.
+This project contains a basic, partial implementation of the C standard library. The intended use is for embedded targets and other low-overhead code. As such, it does not plan to support heap allocation, localization, time zones, math libraries, and other big-system things. The implemented functions are very basic and unoptimized.
 
 ## Usage
 
@@ -63,8 +63,8 @@ Definitely. Or you could talk to me about it.
 
 ## License
 
-The code is licensed under the MIT License. The short version that you can use this code for any purpose, but should retain the copyright notice in the source.
+The code is licensed under the MIT License. The short version is that you can use this code for any purpose, but should retain the copyright notice in the source.
 
 Standard header files in this repository are hereby placed in the public domain. They may be used for any purpose with no attribution.
 
-All code is Copyright (c) 2022-2024 Shac Ron.
+All code is Copyright (c) 2022-2026 Shac Ron.
