@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT License
-// Copyright (c) 2022-2023 Shac Ron
+// Copyright (c) 2022-2026 Shac Ron
 
 #include <ctype.h>
 #include <stddef.h>
@@ -174,7 +174,7 @@ char *strcpy(char *dst, const char *src) {
     return dst;
 }
 
-size_t strcspn(const char *s, const char *charset) {
+size_t strspn(const char *s, const char *charset) {
     size_t i;
     for (i = 0; s[i] != '\0'; i++) {
         for (size_t j = 0; charset[j] != '\0'; j++) {
@@ -270,7 +270,7 @@ char *strrchr(const char *s, int c) {
     return (char*)last;
 }
 
-size_t strspn(const char *s, const char *charset) {
+size_t strcspn(const char *s, const char *charset) {
     size_t i;
     for (i = 0; s[i] != '\0'; i++) {
         for (size_t j = 0; charset[j] != '\0'; j++) {
