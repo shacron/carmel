@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: MIT License
-// Copyright (c) 2022 Shac Ron
+// Copyright (c) 2022-2026 Shac Ron
 
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
 #include <stdbool.h>
 #include <stdlib.h>
+
+#include <carmel/utils.h>
 
 int atoi(const char *s) {
     return (int)strtol(s, (char **)NULL, 10);
@@ -64,23 +66,13 @@ long strtol(const char *restrict s, char **restrict endptr, int base) {
             else break;
         }
         if (add >= b) break;
-        val = val * b + add;
+
+        // val = val * b + add;
+        unsigned long v;
+        if (carmel_mul_overflow_ulong(val, b, &v)) goto overflow;
+        if (carmel_add_overflow_ulong(v, add, &val)) goto overflow;
         valid = true;
         lc = s;
-        if (neg) {
-            if (val > ((unsigned long)LONG_MAX + 1)) {
-                val = LONG_MIN;
-                neg = false;
-                errno = ERANGE;
-                break;
-            }
-        } else {
-            if (val > LONG_MAX) {
-                val = LONG_MAX;
-                errno = ERANGE;
-                break;
-            }
-        }
     }
 
     // munch remaining
@@ -99,6 +91,12 @@ long strtol(const char *restrict s, char **restrict endptr, int base) {
     if (!valid) errno = EINVAL;
     if (endptr) *endptr = (char *)(lc + 1);
     if (neg) return -val;
+    return val;
+
+overflow:
+    if (neg) val = LONG_MIN;
+    else     val = LONG_MAX;
+    errno = ERANGE;
     return val;
 }
 
